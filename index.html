@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chúc Mừng Tốt Nghiệp!</title>
+  <link rel="icon" type="image/png" href="./image/heart.png" />
+  <style>
+    @font-face {
+      font-family: 'woff';
+      src: url('./C.ttf') format('truetype');
+    }
+
+    body {
+      background: #e6d0d0a4;
+      text-align: center;
+      padding: 50px 20px;
+      margin: 0;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .avatar {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      /*border: 5px solid #4CAF50;*/
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h1 {
+      color: #19487e;
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      font-family: 'woff';
+    }
+
+    p {
+      font-size: 1.2em;
+      color: #555;
+    }
+
+    .name {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #19487e;
+      margin-bottom: 10px;
+      font-family: 'woff';
+    }
+
+    .button {
+      font-family: 'woff';
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 1em;
+      background-color: #d8cfc4;
+      color: #19487e;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      margin: 20px auto 0;
+    }
+
+    .button:hover {
+      background-color: #c6bab0;
+    }
+
+    #fireworks-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .message-wrapper {
+      font-family: 'woff';
+      height: 1.8em;
+      overflow: hidden;
+      font-size: 1.5em;
+      color: #a0505b;
+      position: relative;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .message-inner {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.5s ease;
+    }
+
+    .message-inner>div {
+      padding: 5px 0;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.3em;
+        margin-bottom: 80px;
+      }
+
+      p {
+        font-size: 1em;
+      }
+
+      .message-wrapper {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎓 Tự hào về bạn, tân cử nhân!</h1>
+
+  <img class="avatar" src="./image/1.jpg" alt="Ảnh tốt nghiệp" />
+  <p class="name">Hồng Ngọc</p>
+  <div class="message-wrapper">
+    <div class="message-inner" id="message-inner">
+      <div>Hôm nay là lễ tốt nghiệp,</div>
+    </div>
+  </div>
+
+  <p>
+    <a class="button" href="anh.html">👉 Nhấn vào đây</a>
+  </p>
+
+  <canvas id="fireworks-canvas"></canvas>
+  <audio id="bg-music" src="a.mp3" preload="auto"></audio>
+
+  <script>
+    const messages = [
+      "ngày mai bắt đầu cho hành trình mới",
+      "chạm tới ước mơ.",
+      "Cố lên bạn tôi!",
+      ""
+    ];
+
+    const messageInner = document.getElementById("message-inner");
+
+    messages.forEach((msg) => {
+      const div = document.createElement("div");
+      div.textContent = msg;
+      messageInner.appendChild(div);
+    });
+
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % messages.length;
+      messageInner.style.transform = `translateY(-${index * 1.8}em)`;
+    }, 3000);
+
+
+    (() => {
+      const canvas = document.getElementById('fireworks-canvas');
+      const ctx = canvas.getContext('2d');
+      let cw, ch;
+
+      function resize() {
+        cw = window.innerWidth;
+        ch = window.innerHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.radius = Math.random() * 3 + 2;
+          this.speed = Math.random() * 5 + 2;
+          this.angle = Math.random() * 2 * Math.PI;
+          this.vx = Math.cos(this.angle) * this.speed;
+          this.vy = Math.sin(this.angle) * this.speed;
+          this.alpha = 1;
+          this.gravity = 0.05;
+          this.friction = 0.95;
+        }
+
+        update() {
+          this.vx *= this.friction;
+          this.vy *= this.friction;
+          this.vy += this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.alpha -= 0.02;
+        }
+
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha > 0 ? this.alpha : 0;
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 10;
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      let particles = [];
+
+      function createFireworks(x, y) {
+        const colors = ['#ff3f3f', '#ff9f3f', '#fff93f', '#3fff5f', '#3f8fff', '#9f3fff', '#ff3f9f'];
+        for (let i = 0; i < 40; i++) {
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          particles.push(new Particle(x, y, color));
+        }
+      }
+      function randomBetween(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      setInterval(() => {
+        const x = randomBetween(0, window.innerWidth);
+        const y = randomBetween(0, window.innerHeight);
+        createFireworks(x, y);
+      }, 500);
+
+      function animate() {
+        ctx.clearRect(0, 0, cw, ch);
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.update();
+          p.draw(ctx);
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      window.addEventListener('click', (e) => {
+        createFireworks(e.clientX, e.clientY);
+      });
+
+      window.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        createFireworks(touch.clientX, touch.clientY);
+      });
+    })();
+
+    const bgMusic = document.getElementById('bg-music');
+
+    function playMusicOnce() {
+      if (bgMusic.paused) {
+        bgMusic.play().catch(() => {
+          console.log("Phát nhạc bị chặn cho đến khi người dùng tương tác.");
+        });
+      }
+
+      window.removeEventListener('click', playMusicOnce);
+      window.removeEventListener('touchstart', playMusicOnce);
+    }
+
+    window.addEventListener('click', playMusicOnce);
+    window.addEventListener('touchstart', playMusicOnce);
+
+  </script>
+
+</body>
+
+</html>
